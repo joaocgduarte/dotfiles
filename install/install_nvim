@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Simple shell script for install/update nvim
+# $ ./nvim-setup
+# $ which nvim
+# /home/user_name/usr/bin/nvim
+
+# Var
+INSTALL_DIR=$HOME/usr
+UPDATE=no
+
+# INSTALL / UPDATE
+if [ `which nvim` = "$HOME/usr/bin/nvim" ]; then
+  UPDATE=yes
+fi
+
+# Prepare
+## Destination dir
+if [ x${UPDATE} = xno ]; then
+  mkdir ${INSTALL_DIR}
+fi
+
+## Source code
+if [ x${UPDATE} = xno ]; then
+  git clone https://github.com/neovim/neovim.git
+fi
+
+cd neovim/
+
+if [ x${UPDATE} = xyes ]; then
+  git remote update
+  git reset --hard origin/master
+fi
+
+# Build
+make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR}"
+make install
+
+# Last messages
+echo '> Please set PATH'
+echo '> PATH=$PATH:${INSTALL_DIR}/bin/nvim'

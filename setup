@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+mkdir -p "$HOME/.config"
+
+ln -sf "$PWD/.bashrc" "$HOME/.bashrc"
+ln -sf "$PWD/.dircolors" "$HOME/.dircolors"
+ln -sf "$PWD/.scripts" "$HOME/.scripts"
+ln -sf "$PWD/.aliases" "$HOME/.aliases"
+ln -sf "$PWD/.tmux.conf" "$HOME/.tmux.conf"
+ln -sf "$PWD/.nvim" "$HOME/.config/nvim"
+

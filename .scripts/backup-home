@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Configuration
+SOURCE_DIR="/home/joaoduarte"   # Update this with your actual /home directory path
+DESTINATION_USER="pi"           # Raspberry Pi username
+DESTINATION_HOST="192.168.1.66" # Raspberry Pi hostname or IP address
+DESTINATION_DIR="/data/work-home-backups"  # Destination directory on Raspberry Pi
+
+MAX_ARCHIVES=5     # Maximum number of .tar.gz archive files to retain
+
+# Function to check SSH connectivity
+check_ssh_connectivity() {
+    ssh -q "${DESTINATION_USER}@${DESTINATION_HOST}" exit
+    if [ $? -eq 0 ]; then
+        echo "SSH connection to Raspberry Pi established."
+    else
+        echo "Unable to establish SSH connection to Raspberry Pi. Exiting."
+        exit 1
+    fi
+}
+
+# Check SSH connectivity
+check_ssh_connectivity
+
+# Create timestamp for archive filename
+TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+
+# Create a temporary directory for compression
+TEMP_DIR=$(mktemp -d)
+
+# Run rsync command to backup /home directory
+rsync -avz --delete --progress -e ssh "$SOURCE_DIR" "$TEMP_DIR"
+
+# Create .tar.gz archive of the backup
+ARCHIVE_FILENAME="backup_${TIMESTAMP}.tar.gz"
+tar -czvf "${ARCHIVE_FILENAME}" -C "${TEMP_DIR}" .
+
+# Transfer the archive to the Raspberry Pi
+scp "${ARCHIVE_FILENAME}" "${DESTINATION_USER}@${DESTINATION_HOST}:${DESTINATION_DIR}"
+
+# Clean up temporary directory and local archive
+rm -rf "${TEMP_DIR}"
+rm -f "${ARCHIVE_FILENAME}"
+
+echo "Backup archived as ${ARCHIVE_FILENAME} and transferred to Raspberry Pi."
+
+# Delete older .tar.gz archive files if the maximum limit is reached
+archive_count=$(ssh "${DESTINATION_USER}@${DESTINATION_HOST}" "ls -d ${DESTINATION_DIR}/backup_*.tar.gz | wc -l")
+if [ "$archive_count" -gt "$MAX_ARCHIVES" ]; then
+    ssh "${DESTINATION_USER}@${DESTINATION_HOST}" "ls -dt ${DESTINATION_DIR}/backup_*.tar.gz | tail -n +$(($MAX_ARCHIVES + 1)) | xargs rm -rf"
+    echo "Deleted older .tar.gz archive files to retain a maximum of $MAX_ARCHIVES archives."
+fi

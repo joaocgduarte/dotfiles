@@ -1,0 +1,20 @@
+#!/bin/bash 
+# A pretend Python dictionary with bash 3 
+ARRAY=( 
+    "GetPolicy:GetTravelPolicy"
+    "CancelPolicy:CancelTravelPolicy"
+    "Quote:TravelQuote"
+    "CreatePolicy:CreateTravelPolicy"
+    "UpdatePaymentData:EditTravelPolicyPaymentData"
+    "CreatePolicy:CreateTravelPolicy"
+    "RequestPolicyUpgrade:UpgradeTravelPolicy"
+    "ConfirmPolicyUpgrade:ConfirmTravelPolicyUpgrade"
+    "UpdateCustomer:UpdateTravelPolicyCustomer"
+    "UpdateHolder:UpdateTravelPolicyHolder"
+)
+
+for el in "${ARRAY[@]}" ; do
+    KEY=${el%%:*}
+    VALUE=${el#*:}
+    sed -i -- "s/$KEY/$VALUE/g" travel*.go
+done

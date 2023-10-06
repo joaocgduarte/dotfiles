@@ -1,0 +1,116 @@
+#! /bin/bash
+
+#
+# 0. Dependencies
+#
+
+tool1=$(which xdotool)
+tool2=$(which wmctrl)
+
+if [ -z $tool1 ]; then
+    echo "Xdotool is needed, do you want to install it now? [Y/n]"
+    read a
+    if [[ $a == "Y" || $a == "y" || $a = "" ]]; then
+        sudo apt-get install xdotool
+    else
+        echo "Exiting then..."
+        exit 1
+    fi
+fi
+
+if [ -z $tool2 ]; then
+    echo "Wmctrl is needed, do you want to install it now? [Y/n]"
+    read a
+    if [[ $a == "Y" || $a == "y" || $a = "" ]]; then
+        sudo apt-get install wmctrl
+    else
+        echo "Exiting then..."
+        exit 1
+    fi
+fi
+
+open_app() {
+	# Check if the app is running
+	pid=$(pidof $1)
+	forcescreen=${2:-Up}
+	# If it isn't launched, then launch
+
+	if [ -z $pid ]; then
+		$1 1>/dev/null 2>/dev/null &
+		while ! pidof $1 >> /dev/null;
+		do
+			sleep 1
+		done
+		# move window to ACTIVE
+		sleep 2
+		wmctrl -r :ACTIVE:
+		wmctrl -x -R $1
+	else 
+		
+		# If it is launched then check if it is focused
+		foc=$(xdotool getactivewindow getwindowpid)
+
+	    	if [[ $pid != $foc ]]; then
+       			# if it isn't focused then get focus
+        		wmctrl -x -R $1
+			sleep 2
+    		fi
+	fi
+	xdotool key Super_L+Shift+$forcescreen	
+}
+
+open_script() {
+	forcescreen=${2:-Up}
+	sleeptime=${3:-5}
+	$1 1>/dev/null 2>/dev/null &
+	sleep $sleeptime
+	xdotool key Super_L+Shift+$forcescreen	
+}
+
+next_workspace() {
+	xdotool key ctrl+alt+Right
+	sleep 1
+}
+
+#
+# 1. Setup Browser
+#
+open_firefox_tabs() {
+	# Replace with actual work websites and profile. Can be google calendar and gmail,
+	# it can be JIRA, Github, etc.
+	workUrls=( 
+		https://mail.google.com/mail/u/0/#inbox
+		https://calendar.google.com/calendar/u/0/r
+	)
+
+	setxkbmap pt
+
+	for i in "${workUrls[@]}"
+	do
+		xdotool key ctrl+shift+1; sleep 0.2; xdotool type "$i"; sleep 0.2; xdotool key Return; sleep 0.2
+	done
+
+	xdotool key ctrl+Tab; xdotool key ctrl+w
+	sleep 0.5
+}
+
+setup_browser() {
+	open_app firefox
+	sleep 0.5
+	open_firefox_tabs
+}
+
+setup_browser
+
+#
+# 4. Setup comunications (emails, chats, calendar...)
+#
+
+next_workspace
+open_app slack Down
+
+#
+# 5. Uninportant things
+# 
+next_workspace
+open_app spotify Up

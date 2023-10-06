@@ -1,0 +1,38 @@
+#!/bin/bash
+
+cleanup_directory="$1"
+
+# Function to perform data cleanup
+perform_cleanup() {
+    local dir="$1"
+    
+    # Delete files older than 7 days
+    find "$dir" -type f -mtime +7 -exec rm -f {} \;
+    
+    # Delete empty directories after files are cleaned up
+    find "$dir" -type d -empty -delete
+}
+
+# Check if cleanup directory is provided as an argument
+if [ -z "$cleanup_directory" ]; then
+    echo "Usage: $0 <cleanup_directory>"
+    exit 1
+fi
+
+# Check if cleanup directory exists
+if [ ! -d "$cleanup_directory" ]; then
+    echo "Directory '$cleanup_directory' not found."
+    exit 1
+fi
+
+# Perform cleanup in the main directory
+perform_cleanup "$cleanup_directory"
+
+# Perform cleanup in subdirectories
+find "$cleanup_directory" -type d -print0 | while IFS= read -r -d '' subdir; do
+    perform_cleanup "$subdir"
+done
+
+notify-send "Clean up!" "Cleaned up directory $cleanup_directory"
+exit 0
+

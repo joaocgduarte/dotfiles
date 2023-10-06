@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 <function_name> <path_to_file>"
+  exit 1
+fi
+
+input_path="$2"
+dir_path="$(dirname "$input_path")"
+file_name="$(basename "$input_path" | cut -d. -f1)"
+# modified_path="$dir_path/$file_name"_test.go
+
+gotests -w -only "$1" "$2" 
+
+if [ $? -eq 0 ]; then
+  echo "Success"
+else
+  echo "Error generating test code."
+fi

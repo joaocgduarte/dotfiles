@@ -1,0 +1,12 @@
+#!/bin/bash
+comment_symbol=${1:-//}
+
+while read -r line; do
+    if [[ "$line" =~ ^[[:space:]]*$comment_symbol ]]; then
+        # Line is already commented, uncomment it
+        echo "${line#${comment_symbol}*}"
+    else
+        # Line is not commented, comment it
+        echo "$comment_symbol $line"
+    fi
+done

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <file_path>"
+  exit 1
+fi
+
+# Read the selected function name from Vim's visual mode
+function_name="$(xargs echo)"
+
+# Run gotests to generate unit test boilerplate using the file path
+gotests  -only "$function_name" "$1"

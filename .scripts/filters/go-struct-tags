@@ -1,0 +1,30 @@
+#!/bin/bash
+inside_struct=false
+
+while read -r line; do
+    if [[ "$line" =~ ^[[:space:]]*type[[:space:]]+([[:alnum:]_]+)[[:space:]]+struct ]]; then
+        struct_name="${BASH_REMATCH[1]}"
+        echo "$line"
+        inside_struct=true
+    elif [[ "$line" =~ ^[[:space:]]*} && "$inside_struct" == "true" ]]; then
+        inside_struct=false
+        echo "$line"
+    elif [[ "$inside_struct" == "true" ]]; then
+        if [[ "$line" =~ ^[[:space:]]*([[:alnum:]_]+)[[:space:]]+([^\/]+)(\/\/[[:graph:]]+)?$ ]]; then
+            field_name_camel="${BASH_REMATCH[1]}"
+            field_type="${BASH_REMATCH[2]}"
+            comment="${BASH_REMATCH[3]}"
+            
+            # Convert CamelCase to snake_case for JSON tag
+            field_name_snake=$(echo "$field_name_camel" | sed 's/\([a-z0-9]\)\([A-Z]\)/\1_\2/g' | awk '{print tolower($0)}')
+
+            if [ -z "$comment" ]; then
+                echo "    $field_name_camel $field_type \`json:\"$field_name_snake\"\`"
+            else
+                echo "    $field_name_camel $field_type \`json:\"$field_name_snake\" $comment\`"
+            fi
+        fi
+    else
+        echo "$line"
+    fi
+done

@@ -1,0 +1,23 @@
+local lsp_zero = require('lsp-zero').preset({})
+
+lsp_zero.on_attach(function(client, bufnr)
+    lsp_zero.default_keymaps({ buffer = bufnr })
+
+    vim.keymap.set({ 'n', 'x' }, '<C-p>', function () lua vim.lsp.buf.format({async = true}) end, { buffer = bufnr }))
+    vim.keymap.set('n', '<leader>R', '<cmd>lua vim.lsp.buf.rename()<cr>')
+    lsp_zero.buffer_autoformat()
+end)
+
+lsp_zero.ensure_installed({
+    -- Replace these with whatever servers you want to install
+    'tsserver',
+    'eslint',
+    'lua_ls',
+    'gopls',
+    'dockerls',
+    'taplo',
+    'bashls',
+    'phpactor',
+})
+
+lsp_zero.setup()

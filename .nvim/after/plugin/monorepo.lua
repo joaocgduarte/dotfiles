@@ -1,0 +1,15 @@
+require("telescope").load_extension("monorepo")
+
+vim.keymap.set("n", "<leader>M", function()
+    require("telescope").extensions.monorepo.monorepo()
+end)
+
+vim.keymap.set("n", "<leader>ma", function()
+    require("monorepo").add_project()
+end)
+vim.keymap.set("n", "<leader>mr", function()
+    require("monorepo").remove_project()
+end)
+vim.keymap.set("n", "<leader>mt", function()
+    require("monorepo").toggle_project()
+end)

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Function to read input with a default value
+read_with_default() {
+    local prompt="$1 [$2]: "
+    local input
+    read -e -p "$prompt" -i "$2" input
+    if [ -z "$input" ]; then
+        input="$2"
+    fi
+    echo "$input"
+}
+
+# Read date and time input with default value as current datetime
+current_datetime=$(date '+%Y-%m-%d %H:%M')
+datetime=$(read_with_default "Enter date and time (YYYY-MM-DD HH:MM)" "$current_datetime")
+
+# Read text input
+read -r -p "Enter reminder: " text
+
+if [ -z "$text" ]; then
+    echo "Reminder message is empty. No reminder set."
+    exit 1
+fi
+
+ssh -t pi@192.168.1.66 "bash /home/pi/.scripts/set-reminder.sh \"$datetime\" \"$text\""
+

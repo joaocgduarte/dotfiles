@@ -1,0 +1,3 @@
+for i, value := range {1} {
+    // do something with value
+}

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+exit_if_directory_doesnt_exist() {
+	if [ ! -d $1 ] 
+	then
+		echo 
+		echo "[ERROR] Directory not found"
+		echo
+		exit 1
+	fi
+}
+
+organize_directory() {
+	cd $1
+	# Define the categories and their corresponding file extensions
+	declare -A categories=(
+		["sounds"]="mp3 MP3 wav WAV ogg OGG flac FLAC aac AAC m4a M4A wma WMA aiff AIFF au AU ra RA"
+    		["videos"]="mp4 MP4 mkv MKV avi AVI mov MOV wmv WMV flv FLV m4v M4V mpg MPG"
+    		["documents"]="pdf PDF doc DOC docx DOCX txt TXT xls XLS xlsx XLSX ppt PPT odp ODP pptx PPTX csv CSV rtf RTF odt ODT ods ODS xlsx XLSX xls XLS"
+		["archives"]="zip ZIP tar TAR gz GZ 7z 7Z rar RAR tar.gz TAR.GZ"
+    		["images"]="jpg JPG jpeg JPEG png PNG gif GIF bmp BMP tiff TIFF svg SVG heic HEIC webp WEBP"
+    		["code"]="sh SH py PY js JS rb RB pl PL php PHP go GO h H java JAVA c C cpp CPP"
+    		["diagrams"]="puml PUML drawio DRAWIO vsdx VSDX"
+	)
+
+	# Create the directories
+	for category in "${!categories[@]}"; do
+	    mkdir -p "$category"
+	done
+
+	# Move files to their respective directories
+	for category in "${!categories[@]}"; do
+	    extensions=${categories[$category]}
+	    for ext in $extensions; do
+		mv *.$ext "$category" 2>/dev/null
+	    done
+	done
+
+	# Print a summary
+	echo
+	echo "Organizing complete!"
+	echo
+	cd $2
+	notify-send "Directory organized" "Organized directory $1"
+}
+
+currentDirectory=$(pwd)
+directory=$1
+
+exit_if_directory_doesnt_exist $directory
+organize_directory $directory $currentDirectory
+exit 0

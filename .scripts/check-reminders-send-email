@@ -1,0 +1,43 @@
+#!/bin/bash
+
+reminders_file="/home/joaoduarte/reminders.txt"
+
+# Function to send email
+send_email() {
+    local recipient="$1"
+    local subject="$2"
+    local message="$3"
+    
+    echo -e "Subject: $subject\n\n$message" | sendmail $recipient
+}
+
+# Function to check and notify reminders
+check_reminders() {
+    local current_date=$(date "+%Y-%m-%d %H:%M:%S")
+    local email_body=""
+    local updated_reminders=""
+    local send_email_flag=false  # Flag to track if an email needs to be sent    
+   
+    current_timestamp=$(date -d "$current_date" +%s)
+
+    while IFS='|' read -r reminder_date reminder_message || [[ -n "$reminder_date" ]]; do
+	if [[ -n "$reminder_date" ]]; then
+		reminder_timestamp=$(date -d "$reminder_date" +%s)
+		if [[ "$current_timestamp" -ge "$reminder_timestamp" ]]; then
+		    email_body+="Reminder: $reminder_message"$'\n\n'
+		    send_email_flag=true
+		else
+		    updated_reminders+="$reminder_date|$reminder_message"$'\n'
+		fi
+	fi
+    done < "$reminders_file"
+    
+    if [ "$send_email_flag" = true ]; then
+        send_email "$1" "Due Reminders" "$email_body"
+    	echo "$updated_reminders" > "$reminders_file"
+    fi
+}
+
+# Run reminder check and email notifications
+check_reminders $1
+

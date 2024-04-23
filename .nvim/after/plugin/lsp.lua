@@ -32,7 +32,7 @@ require('mason-lspconfig').setup({
         'lua_ls',
         'gopls',
         'dockerls',
-        'taplo',
+        -- 'taplo',
         'bashls',
         'phpactor',
     },
@@ -78,3 +78,5 @@ cmp.setup({
         end, { "i", "s", "c", }),
     }),
 })
+
+vim.lsp.set_log_level("off")
